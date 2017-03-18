@@ -1,7 +1,11 @@
 package pkgLibrary;
 
+import java.io.File;
 import java.util.Date;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -15,6 +19,7 @@ public class Book {
 	private double price;
 	private Date publish_date;
 	private String description;
+	private double cost;
 
 	public Book() {
 
@@ -30,9 +35,38 @@ public class Book {
 		this.price = price;
 		this.publish_date = publish_date;
 		this.description = description;
+		this.cost = price * .8;
 	}
 	
  
+	
+	public Book(String id) {
+		super();
+		this.id = id;
+		Catalog temp = ReadXMLFile();
+		boolean within = false;
+		for(Book b: temp.getBooks()){
+			if(b.getId().equals(id)){
+				within = true;
+				this.author = b.getAuthor();
+				this.title = b.getTitle();
+				this.genre = b.getGenre();		
+				this.price = b.getPrice();
+				this.publish_date = b.getPublish_date();
+				this.description = b.getDescription();
+				this.cost = price * .8;
+			}
+		}
+	}
+
+	public double getCost() {
+		return cost;
+	}
+	
+	@XmlElement
+	public void setCost(double cost) {
+		this.cost = cost;
+	}
 
 	public String getId() {
 		return id;
@@ -96,8 +130,27 @@ public class Book {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	private static Catalog ReadXMLFile() {
 
-	
-	
+		Catalog cat = null;
+
+		String basePath = new File("").getAbsolutePath();
+		basePath = basePath + "\\src\\main\\resources\\XMLFiles\\Books.xml";
+		File file = new File(basePath);
+
+		System.out.println(file.getAbsolutePath());
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(Catalog.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			cat = (Catalog) jaxbUnmarshaller.unmarshal(file);
+			System.out.println(cat);
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+
+		return cat;
+
+	}
 
 }
